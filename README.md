@@ -98,8 +98,6 @@ y = model(x)
 
 ## ResNet
 
-### #1
-
 ```
 import nn
 
@@ -135,8 +133,6 @@ y = model(x)
 
 ## Lambda
 
-### #1
-
 ```
 import nn
 
@@ -157,4 +153,100 @@ model = nn.Module(
 )
 
 y = model(x)
+```
+
+## Block
+
+```
+import nn
+
+module = nn.Module()
+module.add(
+	nn.BatchNormalization(1000),
+	nn.Linear(1000, 1000),
+	nn.ReLU(),
+	nn.Dropout(),
+)
+module.add(
+	nn.BatchNormalization(1000),
+	nn.Linear(1000, 1000),
+	nn.ReLU(),
+	nn.Dropout(),
+)
+module.add(
+	nn.BatchNormalization(1000),
+	nn.Linear(1000, 1000),
+	nn.ReLU(),
+	nn.Dropout(),
+)
+
+use_batchnorm = True
+use_dropout = True
+
+x = np.random.normal(0, 1, (100, 1000)).astype(np.float32)
+
+for block in module.blocks():
+	batchnorm, linear, f, dropout = block
+	if use_batchnorm:
+		x = batchnorm(x)
+	x = linear(x)
+	x = f(x)
+	if use_dropout:
+		x = dropout(x)
+```
+
+## Submodule
+
+```
+import nn
+
+class AutoEncoder(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.encoder = nn.Module(
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 2),
+		)
+		self.decoder = nn.Module(
+			nn.Linear(2, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+		)
+
+autoencoder = AutoEncoder()
+x = np.random.normal(0, 1, (100, 1000)).astype(np.float32)
+z = autoencoder.encoder(x)
+_x = autoencoder.decoder(z)
+```
+
+## Serialization
+
+```
+import nn
+
+class AutoEncoder(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.encoder = nn.Module(
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 2),
+		)
+		self.decoder = nn.Module(
+			nn.Linear(2, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+		)
+
+autoencoder = AutoEncoder()
+autoencoder.save("autoencoder.model")
 ```

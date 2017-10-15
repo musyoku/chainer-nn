@@ -1,4 +1,5 @@
 import chainer, cupy
+import numpy as np
 import nn
 
 class Model1(nn.Module):
@@ -210,6 +211,29 @@ def main():
 	compare_layers(model_1, model_2)
 	check_cupy_ndarray(model_1)
 	check_cupy_ndarray(model_2)
+
+	class AutoEncoder(nn.Module):
+		def __init__(self):
+			super().__init__()
+			self.encoder = nn.Module(
+				nn.Linear(1000, 1000),
+				nn.ReLU(),
+				nn.Linear(1000, 1000),
+				nn.ReLU(),
+				nn.Linear(1000, 2),
+			)
+			self.decoder = nn.Module(
+				nn.Linear(2, 1000),
+				nn.ReLU(),
+				nn.Linear(1000, 1000),
+				nn.ReLU(),
+				nn.Linear(1000, 1000),
+			)
+
+	autoencoder = AutoEncoder()
+	x = np.random.normal(0, 1, (100, 1000)).astype(np.float32)
+	z = autoencoder.encoder(x)
+	_x = autoencoder.decoder(z)
 
 if __name__ == "__main__":
 	main()

@@ -245,9 +245,16 @@ class Module(chainer.Chain):
 		self.__layers__ = []
 		self.__links__ = []
 		self.__modules__ = []
+		self.__blocks__ = []
 		self.__parent_module__ = None
 		if len(layers) > 0:
 			self.add(*layers)
+
+	def blocks(self):
+		return self.__blocks__
+
+	def layers(self):
+		return self.__layers__
 
 	def add(self, *layers):
 		with self.init_scope():
@@ -262,6 +269,7 @@ class Module(chainer.Chain):
 						if isinstance(_layer, chainer.Link):
 							setattr(self, "_nn_layer_{}_res_{}".format(index, _index), _layer)
 		self.__layers__ += layers
+		self.__blocks__.append(layers)
 
 	def __setattr__(self, name, value):
 		assert isinstance(value, Residual) is False
@@ -282,7 +290,7 @@ class Module(chainer.Chain):
 			self.__links__.append((name, value))
 
 			self.update_params()
-			
+
 			with self.init_scope():
 				return self.super__setattr__(name, value)
 
