@@ -319,7 +319,11 @@ class AutoEncoder(nn.Module):
 			nn.Linear(1000, 1000),
 			nn.ReLU(),
 		)
-		self.encoder.mean = nn.Linear(1000, 2)
+		self.encoder.mean = nn.Module(
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 2),
+		)
 		self.encoder.ln_var = nn.Linear(1000, 2)
 
 		self.decoder = nn.Module(
