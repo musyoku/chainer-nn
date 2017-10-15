@@ -250,3 +250,63 @@ class AutoEncoder(nn.Module):
 autoencoder = AutoEncoder()
 autoencoder.save("autoencoder.model")
 ```
+
+## Optimizer
+
+### #1
+
+```
+import nn
+
+class AutoEncoder(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.encoder = nn.Module(
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 2),
+		)
+		self.decoder = nn.Module(
+			nn.Linear(2, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+		)
+
+autoencoder = AutoEncoder()
+optimizer = chainer.optimizers.SGD()
+optimizer.setup(autoencoder)
+```
+
+### #2
+
+```
+import nn
+
+class AutoEncoder(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.encoder = nn.Module(
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 2),
+		)
+		self.decoder = nn.Module(
+			nn.Linear(2, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+		)
+
+autoencoder = AutoEncoder()
+optimizer_encoder = chainer.optimizers.SGD()
+optimizer_decoder = chainer.optimizers.Adam()
+optimizer_encoder.setup(autoencoder.encoder)
+optimizer_decoder.setup(autoencoder.decoder)
+```
