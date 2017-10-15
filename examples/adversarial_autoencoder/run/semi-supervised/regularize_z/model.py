@@ -1,8 +1,11 @@
-import nn
-
+import sys, os, chainer
+import numpy as np
+from chainer import functions
+sys.path.append(os.path.join("..", "..", ".."))
+import aae.nn as nn
 
 class Model(nn.Module):
-	def __init__(self, ndim_x=28*28, ndim_y=10, ndim_z=2, ndim_h=1000):
+	def __init__(self, ndim_x=28*28, ndim_y=11, ndim_z=2, ndim_h=1000):
 		super(Model, self).__init__()
 		self.ndim_x = ndim_x
 		self.ndim_y = ndim_y
@@ -66,9 +69,3 @@ class Model(nn.Module):
 
 	def decode_z_x(self, z):
 		return self.decoder(z)
-
-def main():
-	pass
-
-if __name__ == "__main__":
-	main()
