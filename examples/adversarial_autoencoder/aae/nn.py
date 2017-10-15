@@ -240,7 +240,7 @@ class Residual(object):
 
 class Module(chainer.Chain):
 	def __init__(self, *layers):
-		super().__init__()
+		super(Module, self).__init__()
 		self.__module_name__ = None
 		self.__layers__ = []
 		self.__links__ = []
@@ -284,7 +284,7 @@ class Module(chainer.Chain):
 			self.update_submodules()
 			return self.super__setattr__(name, value)
 
-		super().__setattr__(name, value)
+		super(Module, self).__setattr__(name, value)
 
 	def update_submodules(self):
 		for index, (module_name, module) in enumerate(self.__modules__):
@@ -323,10 +323,10 @@ class Module(chainer.Chain):
 	def super__setattr__(self, name, value):
 		if name in dir(self):
 			return
-		super().__setattr__(name, value)
+		super(Module, self).__setattr__(name, value)
 
 	def set_parent_module(self, module):
-		super().__setattr__("__parent_module__", module)
+		super(Module, self).__setattr__("__parent_module__", module)
 
 	def save(self, filename):
 		tmp_filename = filename + "." + str(uuid.uuid4())

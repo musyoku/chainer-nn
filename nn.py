@@ -240,7 +240,7 @@ class Residual(object):
 
 class Module(chainer.Chain):
 	def __init__(self, *layers):
-		super().__init__()
+		super(Module, self).__init__()
 		self.__module_name__ = None
 		self.__layers__ = []
 		self.__links__ = []
@@ -260,7 +260,7 @@ class Module(chainer.Chain):
 				if isinstance(layer, Residual):
 					for _index, _layer in enumerate(layer.__layers__):
 						if isinstance(_layer, chainer.Link):
-							setattr(self, "_nn_layer_{}_{}".format(index, _index), _layer)
+							setattr(self, "_nn_layer_{}_res_{}".format(index, _index), _layer)
 		self.__layers__ += layers
 
 	def __setattr__(self, name, value):
@@ -272,7 +272,7 @@ class Module(chainer.Chain):
 			self.__modules__.append((name, value))
 			value.set_parent_module(self)
 
-			self.update_submodules()
+			self.update_params()
 			return super(chainer.Link, self).__setattr__(name, value)	# prevent module from being added to self._children
 
 		if isinstance(value, chainer.Link):
@@ -281,17 +281,19 @@ class Module(chainer.Chain):
 
 			self.__links__.append((name, value))
 
-			self.update_submodules()
-			return self.super__setattr__(name, value)
+			self.update_params()
+			
+			with self.init_scope():
+				return self.super__setattr__(name, value)
 
-		super().__setattr__(name, value)
+		super(Module, self).__setattr__(name, value)
 
-	def update_submodules(self):
+	def update_params(self):
 		for index, (module_name, module) in enumerate(self.__modules__):
 			self.set_submodule(module_name, module)
 
 		if self.__parent_module__ is not None:
-			self.__parent_module__.update_submodules()
+			self.__parent_module__.update_params()
 
 	def set_submodule(self, namespace, module):
 		assert isinstance(module, Module)
@@ -323,10 +325,10 @@ class Module(chainer.Chain):
 	def super__setattr__(self, name, value):
 		if name in dir(self):
 			return
-		super().__setattr__(name, value)
+		super(Module, self).__setattr__(name, value)
 
 	def set_parent_module(self, module):
-		super().__setattr__("__parent_module__", module)
+		super(Module, self).__setattr__("__parent_module__", module)
 
 	def save(self, filename):
 		tmp_filename = filename + "." + str(uuid.uuid4())
