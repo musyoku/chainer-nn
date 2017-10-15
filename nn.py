@@ -240,7 +240,7 @@ class Residual(object):
 
 class Module(chainer.Chain):
 	def __init__(self, *layers):
-		super(Module, self).__init__()
+		super().__init__()
 		self.__module_name__ = None
 		self.__layers__ = []
 		self.__links__ = []
@@ -258,7 +258,7 @@ class Module(chainer.Chain):
 					setattr(self, "_nn_layer_%d" % index, layer)
 
 				if isinstance(layer, Residual):
-					for _index, _layer in enumerate(layer.layers):
+					for _index, _layer in enumerate(layer.__layers__):
 						if isinstance(_layer, chainer.Link):
 							setattr(self, "_nn_layer_{}_{}".format(index, _index), _layer)
 		self.__layers__ += layers
@@ -268,60 +268,65 @@ class Module(chainer.Chain):
 
 		if isinstance(value, Module):
 			self.__module_name__ = name
-			if self.__parent_module__ is not None:
-				setattr(self.__parent_module__, "{}_{}".format(self.__parent_module__.__module_name__, name), value)
 
 			self.__modules__.append((name, value))
-			self._set_submodule(name, value)
-			value._set_parent_module(self)
+			value.set_parent_module(self)
+
+			self.update_submodules()
 			return super(chainer.Link, self).__setattr__(name, value)	# prevent module from being added to self._children
 
 		if isinstance(value, chainer.Link):
-			if self.__parent_module__ is not None:
-				assert self.__parent_module__.__module_name__ is not None
-				setattr(self.__parent_module__, "{}_{}".format(self.__parent_module__.__module_name__, name), value)
-
 			if name.startswith("_nn_layer_"):
-				return super(Module, self).__setattr__(name, value)
+				return self.super__setattr__(name, value)
 
 			self.__links__.append((name, value))
-			return super(Module, self).__setattr__(name, value)
 
-		super(Module, self).__setattr__(name, value)
+			self.update_submodules()
+			return self.super__setattr__(name, value)
 
-	def _set_submodule(self, namespace, module):
+		super().__setattr__(name, value)
+
+	def update_submodules(self):
+		for index, (module_name, module) in enumerate(self.__modules__):
+			self.set_submodule(module_name, module)
+
+		if self.__parent_module__ is not None:
+			self.__parent_module__.update_submodules()
+
+	def set_submodule(self, namespace, module):
 		assert isinstance(module, Module)
 
-		self._set_submodule_layers(namespace, module)
-		self._set_submodule_links(namespace, module)
+		self.set_submodule_layers(namespace, module)
+		self.set_submodule_links(namespace, module)
 
-		with self.init_scope():
-			for index, (module_name, module) in enumerate(module.__modules__):
-				assert isinstance(module, Module)
-				self._set_submodule("{}_{}".format(namespace, module_name), module)
+		for index, (module_name, module) in enumerate(module.__modules__):
+			assert isinstance(module, Module)
+			self.set_submodule("{}_{}".format(namespace, module_name), module)
 
-	def _set_submodule_layers(self, namespace, module):
+	def set_submodule_layers(self, namespace, module):
 		with self.init_scope():
 			for index, layer in enumerate(module.__layers__):
 				if isinstance(layer, chainer.Link):
-					super(Module, self).__setattr__("_nn_{}_layer_{}".format(namespace, index), layer)
+					self.super__setattr__("_nn_{}_layer_{}".format(namespace, index), layer)
 
 				if isinstance(layer, Residual):
 					for resnet_index, _layer in enumerate(layer.__layers__):
 						if isinstance(_layer, chainer.Link):
-							super(Module, self).__setattr__("_nn_{}_layer_{}_res_{}".format(namespace, index, resnet_index), _layer)
+							self.super__setattr__("_nn_{}_layer_{}_res_{}".format(namespace, index, resnet_index), _layer)
 
-	def _set_submodule_links(self, namespace, module):
+	def set_submodule_links(self, namespace, module):
 		with self.init_scope():
 			for index, (link_name, link) in enumerate(module.__links__):
 				assert isinstance(link, chainer.Link)
-				super(Module, self).__setattr__("_nn_{}_link_{}".format(namespace, link_name), link)
+				self.super__setattr__("_nn_{}_link_{}".format(namespace, link_name), link)
 
-	def _setattr(self, name, value):
-		pass
+	def super__setattr__(self, name, value):
+		if name in dir(self):
+			return
+		super().__setattr__(name, value)
 
-	def _set_parent_module(self, module):
-		super(Module, self).__setattr__("__parent_module__", module)
+	def set_parent_module(self, module):
+		super().__setattr__("__parent_module__", module)
 
 	def save(self, filename):
 		tmp_filename = filename + "." + str(uuid.uuid4())
