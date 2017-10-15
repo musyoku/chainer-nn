@@ -310,3 +310,65 @@ optimizer_decoder = chainer.optimizers.Adam()
 optimizer_encoder.setup(autoencoder.encoder)
 optimizer_decoder.setup(autoencoder.decoder)
 ```
+
+## Additional Layers
+
+### #1
+
+```
+import nn
+
+module = nn.Module(
+	nn.Linear(1000, 1000),
+	nn.ReLU(),
+	nn.Linear(1000, 1000),
+	nn.ReLU(),
+)
+module.mean = nn.Linear(1000, 2)
+module.ln_var = nn.Linear(1000, 2)
+
+x = np.random.normal(0, 1, (100, 1000)).astype(np.float32)
+
+internal = module(x)
+mean = module.mean(internal)
+ln_var = module.ln_var(internal)
+z = chainer.functions.gaussian(mean, ln_var)
+```
+
+### #2
+
+```
+import nn
+
+class AutoEncoder(nn.Module):
+	def __init__(self):
+		super().__init__()
+		self.encoder = nn.Module(
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+		)
+		self.encoder.mean = nn.Linear(1000, 2)
+		self.encoder.ln_var = nn.Linear(1000, 2)
+
+		self.decoder = nn.Module(
+			nn.Linear(2, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+			nn.ReLU(),
+			nn.Linear(1000, 1000),
+		)
+
+	def encode_x_to_z(self, x):
+		internal = self.encoder(x)
+		mean = self.encoder.mean(internal)
+		ln_var = self.encoder.ln_var(internal)
+		z = chainer.functions.gaussian(mean, ln_var)
+		return z
+
+autoencoder = AutoEncoder()
+x = np.random.normal(0, 1, (100, 1000)).astype(np.float32)
+z = autoencoder.encode_x_to_z(x)
+_x = autoencoder.decoder(z)
+```
