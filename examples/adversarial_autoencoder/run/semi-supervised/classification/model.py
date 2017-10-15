@@ -13,8 +13,10 @@ class Model(nn.Module):
 		self.ndim_h = ndim_h
 
 		self.decoder = nn.Module(
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, ndim_h),
 			nn.ReLU(),
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, ndim_x),
 			nn.Tanh(),
 		)
@@ -25,6 +27,7 @@ class Model(nn.Module):
 		self.encoder = nn.Module(
 			nn.Linear(ndim_x, ndim_h),
 			nn.ReLU(),
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, ndim_h),
 			nn.ReLU(),
 		)
@@ -35,20 +38,25 @@ class Model(nn.Module):
 			nn.GaussianNoise(std=0.3),
 			nn.Linear(ndim_z, ndim_h),
 			nn.ReLU(),
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, ndim_h),
 			nn.ReLU(),
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, 2),
 		)
 
 		self.discriminator_y = nn.Module(
 			nn.GaussianNoise(std=0.3),
+			# nn.GaussianNoise(0, 0.3),
 			nn.Linear(ndim_y, ndim_h),
 			nn.ReLU(),
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, ndim_h),
 			nn.ReLU(),
+			# nn.BatchNormalization(ndim_h),
 			nn.Linear(ndim_h, 2),
 		)
-
+		
 		for param in self.params():
 			if param.name == "W":
 				param.data[...] = np.random.normal(0, 0.01, param.data.shape)

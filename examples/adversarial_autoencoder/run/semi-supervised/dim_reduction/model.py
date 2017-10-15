@@ -35,8 +35,7 @@ class Model(nn.Module):
 			nn.ReLU(),
 		)
 		self.encoder.head_y = nn.Linear(ndim_h, ndim_y)
-		encoder.head_z = nn.Linear(ndim_h, ndim_z)
-		self.encoder = encoder
+		self.encoder.head_z = nn.Linear(ndim_h, ndim_z)
 
 		self.discriminator_z = nn.Module(
 			nn.GaussianNoise(std=0.3),
