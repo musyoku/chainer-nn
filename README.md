@@ -66,36 +66,6 @@ model.add(
 y = model(x)
 ```
 
-### #3
-
-```
-import nn
-
-model = nn.Module()
-model.add(
-	nn.Linear(None, 1024),
-	nn.ReLU(),
-	nn.BatchNormalization(1024),
-	nn.Linear(None, 512),
-	nn.ReLU(),
-	nn.BatchNormalization(512),
-)
-if False:
-	model.add(
-		nn.Linear(None, 256),
-		nn.ReLU(),
-		nn.BatchNormalization(256),
-		nn.Linear(None, 128),
-		nn.ReLU(),
-		nn.BatchNormalization(128),
-	)
-model.add(
-	nn.Linear(None, 10),
-)
-
-y = model(x)
-```
-
 ## ResNet
 
 ```
