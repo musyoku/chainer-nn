@@ -165,6 +165,7 @@ def check_cupy_ndarray(module):
 		if isinstance(value, (chainer.Chain, Model1, Model2)):
 			continue
 		if isinstance(value, chainer.Link):
+			print(key, value.W.data.data)
 			assert isinstance(value.W.data, cupy.core.core.ndarray)
 
 def compare_layers(a, b):

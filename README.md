@@ -1,5 +1,7 @@
 # chainer.nn
 
+- [ChainerのChainをもっと楽に書く](http://musyoku.github.io/2017/10/15/chainer-nn/)
+
 ## Requirements
 
 - Chainer 2.x
